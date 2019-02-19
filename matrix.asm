@@ -13,11 +13,11 @@ start:
 	// jsr set_character_ram
 	lda vshtxt
 	and #$f0
-	ora #$08
+	ora #$0c
 	sta vshtxt
 	jsr $a022
-	jsr copy_character_rom
-	jsr edit_character_ram
+	//jsr copy_character_rom
+	//jsr edit_character_ram
 	rts
 
 copy_character_rom:
@@ -28,9 +28,9 @@ copy_character_rom:
 	sta mvsrc+1 //
 	lda #$10
 	sta pages   
-	lda #$00    // pointer to $2000
+	lda #$00    // pointer to $3000
 	sta mvdst   //
-	lda #$20    //
+	lda #$30    //
 	sta mvdst+1 //
 outer_loop:
 	ldy #0      // indfet source index
@@ -53,20 +53,12 @@ inner_loop:
 
 	rts
 
-.align $100
-characters:
-	.byte %00110110
-	.byte %01001001
-	.byte %01001001
-	.byte %00110110
-	.byte %01001001
-	.byte %01001001
-	.byte %00110110
-	.byte %00000000
+* = $3000
+#import "Katakana-charset.s"
 edit_character_ram:
 	ldy #0
 !:
-	lda characters,y
+	lda charset,y
 	sta $2000,y
 	iny
 	cpy #8
