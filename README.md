@@ -8,6 +8,7 @@ GRAPHIC    DLOAD"   DIRECTORY   SCNCLR
   F5         F6        F7         F8
 DSAVE"      RUN       LIST      MONITOR
 111
+```
 
 
 `COLOR 0,1:COLOR 4,12:COLOR 5,6`
@@ -129,8 +130,6 @@ Standard BANKs:
 14 - KERNAL/BASIC ROM/RAM 0/Character ROM
 15 - KERNAL/BASIC ROM/RAM 0/ I/O
 ```
-
-
 
 
 # Character ROM hack from [Atari Magazine](https://www.atarimagazines.com/compute/issue67/346_1_Advanced_Commodore_128_Video.php)
