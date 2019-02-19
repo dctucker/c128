@@ -7,7 +7,6 @@ GRAPHIC    DLOAD"   DIRECTORY   SCNCLR
 
   F5         F6        F7         F8
 DSAVE"      RUN       LIST      MONITOR
-111
 ```
 
 
