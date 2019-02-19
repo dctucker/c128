@@ -1,7 +1,4 @@
-5 gosub 160
-10 poke 217,4
-20 graphic 2,1
-30 poke 2604,peek(2604) and 240 or 8
+5 rem gosub 160
 45 sys q
 48 rem this is the hard way to copy ram... for l=0 to 4095:bank 14:c=peek(53248+l):bank0:poke 8192+l,c:next
 50 graphic 0,1:color 0,1:color 4,12:color 5,6
