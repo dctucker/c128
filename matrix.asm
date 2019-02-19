@@ -17,6 +17,7 @@ start:
 	sta vshtxt
 	jsr $a022
 	jsr copy_character_rom
+	jsr edit_character_ram
 	rts
 
 copy_character_rom:
@@ -52,6 +53,26 @@ inner_loop:
 
 	rts
 
+.align $100
+characters:
+	.byte %00110110
+	.byte %01001001
+	.byte %01001001
+	.byte %00110110
+	.byte %01001001
+	.byte %01001001
+	.byte %00110110
+	.byte %00000000
+edit_character_ram:
+	ldy #0
+!:
+	lda characters,y
+	sta $2000,y
+	iny
+	cpy #8
+	bne !-
+	
+	rts
 
 set_character_ram:
 	:Bank(15)
