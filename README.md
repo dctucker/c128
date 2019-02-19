@@ -15,51 +15,59 @@ DSAVE"      RUN       LIST      MONITOR
 
 Figure 6-1. Source Numbers.
 
-0	40-column background color (VIC)
-1	Foreground for the graphics screen (VIC)
-2	Foreground color 1 for the multicolor screen (VIC)
-3	Foreground color 2 for the multicolor screen (VIC)
-4	40-column (VIC) border (whether in text or graphics mode)
-5	Character color for 40- or 80-column text screen
-6	80-column background color (8563)
+|Source|Description|
+|----|----|
+|0|	40-column background color (VIC)|
+|1|	Foreground for the graphics screen (VIC)|
+|2|	Foreground color 1 for the multicolor screen (VIC)|
+|3|	Foreground color 2 for the multicolor screen (VIC)|
+|4|	40-column (VIC) border (whether in text or graphics mode)|
+|5|	Character color for 40- or 80-column text screen|
+|6|	80-column background color (8563)|
 
 Figure 6-2. Color Numbers in 40-Column Format.
 
-1	Black 	
-9	Orange
-2	White 	
-10	Brown
-3	Red 	
-11	Light Red
-4	Cyan 	
-12	Dark Gray
-5	Purple 	
-13	Medium Gray
-6	Green 	
-14	Light Green
-7	Blue 	
-15	Light Blue
-8	Yellow 	
-16	Light Gray
+|Number|Color|
+|----|----|
+|1|	Black |	
+|9|	Orange|
+|2|	White |	
+|10|	Brown|
+|3|	Red |	
+|11|	Light Red|
+|4|	Cyan |	
+|12|	Dark Gray|
+|5|	Purple |	
+|13|	Medium Gray|
+|6|	Green |	
+|14|	Light Green|
+|7|	Blue |	
+|15|	Light Blue|
+|8|	Yellow |	
+|16|	Light Gray|
+
 
 Figure 6-3. Color Numbers in 80-Column Format.
 
-1	Black
-9	Dark Purple
-2	White
-10	Brown
-3	Dark Red
-11	Light Red
-4	Light Cyan
-12	Dark Cyan
-5	Light Purple
-13	Medium Gray
-6	Dark Green
-14	Light Green
-7	Dark Blue
-15	Light Blue
-8	Light Yellow
-16	Light Gray
+|Number|Color|
+|----|----|
+|1	|Black|
+|9	|Dark Purple|
+|2	|White|
+|10	|Brown|
+|3	|Dark Red|
+|11	|Light Red|
+|4	|Light Cyan|
+|12	|Dark Cyan|
+|5	|Light Purple|
+|13	|Medium Gray|
+|6	|Dark Green|
+|14	|Light Green|
+|7	|Dark Blue|
+|15	|Light Blue|
+|8	|Light Yellow|
+|16	|Light Gray|
+
 
 
 ```
