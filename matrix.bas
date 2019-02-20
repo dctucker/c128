@@ -1,17 +1,22 @@
-5 rem gosub 160
-45 sys q
+10 sys q
 50 color 0,1:color 4,12:color 5,6
 60 gosub 160
-100 rem data 255,129,129,129,129,129,129,255: for l=0 to 7:read s:poke 8192+l,s:next
-120 end
+70 end
 160 print"{clr}"
 161 for k=0 to 1
 162 for j=32 to 127 step 16
-163 for i=0 to 15
-164 print chr$(k*128+j+i);
-165 next
-166 print
-167 next
-168 print
-169 next
+163 for i=0 to 15:print chr$(k*128+j+i);:next
+166 print:next
+168 print:next
 170 return
+200 x=int(rnd(1)*40):y=int(rnd(1)*25)
+210 c=64+int(rnd(1)*32)
+220 poke 1024+y*40+x,c+int(rnd(1)*2)*128
+230 k=5+int(rnd(1)*2)*8
+230 pokedec("d800")+y*40+x,k
+290 return
+300 gosub 200
+310 color 5,6
+320 gosub 200
+330 color 5,12
+340 goto 300

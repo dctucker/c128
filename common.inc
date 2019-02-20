@@ -1,19 +1,27 @@
+.const Free_Graphics_RAM = $a022
+.const indfet = $ff74
+.const indsta = $ff77
+.const vshtxt = $0a2c
+.const txttab = $4000
 
 .macro BasicUpstart128(address) {
 	.pc = $1c01 "C128 Basic"
 	.word upstartEnd  // link address
 	.word 1   // line num
-	.byte $51
-	.byte $b2
+	.byte $51 // q
+	.byte $b2 // =
 	.byte $d1  // dec
 	.byte '('
 	.byte '"'
 	.text toHexString(address).toUpperCase()
 	.byte '"'
 	.byte ')'
+	//.byte ':'
+	//.byte $9e // sys
+	//.byte $51 // q
 	.byte 0
-	.var basic = LoadBinary("matrix.seq","C64FILE")
-	.fill basic.getSize(), basic.get(i)
+	.import binary "matrix.seq", $2
+
 upstartEnd:
 	.word 0  // empty link signals the end of the program
 	.pc = $1c12 "Basic End"

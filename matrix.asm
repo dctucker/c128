@@ -3,9 +3,6 @@
 .const mvsrc = $fa
 .const pages = $fc
 .const mvdst = $fd
-.const indfet = $ff74
-.const indsta = $ff77
-.const vshtxt = $0a2c
 
 .pc = $1400 "Assembly main"
 
@@ -15,11 +12,19 @@ start:
 	and #$f0
 	ora #$0c
 	sta vshtxt
-	jsr $a022
+	jsr Free_Graphics_RAM
+	jsr move_basic
 	//jsr copy_character_rom
 	//jsr edit_character_ram
 	rts
 
+move_basic:
+	lda #$00
+	sta txttab
+	lda #$40
+	sta txttab+1
+	rts
+	
 copy_character_rom:
 	:Bank(0)
 	lda #$00    // pointer to $D000
@@ -53,8 +58,16 @@ inner_loop:
 
 	rts
 
-* = $3000
-#import "Katakana-charset.s"
+.pc = "Matrix routine"
+colors:
+	// wht, l.grn, grn, d.gry, blk
+	.byte #1,#13,#5,#11,#0
+matrix_loop:
+	rts
+	
+
+
+.pc = $2f00 "Character RAM routine"
 edit_character_ram:
 	ldy #0
 !:
@@ -77,5 +90,12 @@ set_character_ram:
 	ora #$08
 	sta $0a2c
 	rts
+
+.pc = $3000 "Character set"
+charset:
+#import "Katakana-charset.s"
+.pc = $3800 "Character set"
+#import "Katakana-charset.s"
+
 
 :BasicUpstart128(start)
