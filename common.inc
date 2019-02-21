@@ -84,3 +84,10 @@ upstartEnd:
 	lda #$80
 	sta $d412
 }
+
+.macro move_basic(addr) {
+	lda #<addr
+	sta txttab
+	lda #>addr
+	sta txttab+1
+}

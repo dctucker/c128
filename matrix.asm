@@ -14,20 +14,13 @@ start:
 	ora #$0c
 	sta vshtxt
 	jsr Free_Graphics_RAM
-	jsr move_basic
+	:move_basic($4000)
 	:random_init()
 	jmp matrix_loop
 	//jsr copy_character_rom
 	//jsr edit_character_ram
 	rts
 
-move_basic:
-	lda #$00
-	sta txttab
-	lda #$40
-	sta txttab+1
-	rts
-	
 copy_character_rom:
 	:Bank(0)
 	lda #$00    // pointer to $D000
@@ -61,7 +54,7 @@ inner_loop:
 
 	rts
 
-.pc = $1c40 "Matrix"
+.pc = $1500 "Matrix"
 
 .const rx = $f0
 .const ry = $f1
@@ -75,9 +68,9 @@ matrix_loop:
 	sta rx
 	:random(25)
 	sta ry
-	:random(32)
-	clc
-	adc #$40
+	:random(46)
+	tay
+	lda kana,y
 	sta rc
 	:random(4)
 	sta rk
@@ -86,10 +79,10 @@ matrix_loop:
 	jmp matrix_loop
 
 putchar:
-	lda #$00
+	lda #<screen
 	sta offset
-	lda #$04
-	sta offset+1 // offset = $0400
+	lda #>screen
+	sta offset+1
 
 	lda ry
 	sta sy
@@ -117,6 +110,14 @@ colors:
 	// wht, l.grn, grn, d.gry, blk
 	.byte 1,13,5,11,0
 	
+kana:
+	.for(var i=64; i < 94; i++){
+	.byte i
+	}
+	.byte 102
+	.for(var i=113; i < 128; i++){
+	.byte i
+	}
 
 
 .pc = $2f00 "Character RAM routine"
