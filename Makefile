@@ -12,5 +12,5 @@ clean:
 
 
 run:
-	${C128} matrix.prg
+	${C128} -remotemonitor matrix.prg
 
