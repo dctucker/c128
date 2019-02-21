@@ -3,6 +3,7 @@
 .const indsta = $ff77
 .const vshtxt = $0a2c
 .const txttab = $4000
+.const noise  = $d41b
 
 .macro BasicUpstart128(address) {
 	.pc = $1c01 "C128 Basic"
@@ -47,4 +48,39 @@ upstartEnd:
 		lda #001110  // IO, kernal, RAM0. No basic
 	}
 	sta $ff00
+}
+
+.macro mul2(scale,reg) {
+	clc
+	.for(var i=0; i < scale; i++){
+		asl reg
+		rol reg+1
+	}
+}
+
+.macro bigadd(input,result) {
+	clc
+	lda input
+	adc result
+	sta result
+	lda input+1
+	adc result+1
+	sta result+1
+}
+
+.macro random(max) {
+!:
+	clc
+	lda noise
+	and #pow(2,ceil(log(max)/log(2)))-1
+	cmp #max
+	bcs !-
+}
+
+.macro random_init() {
+	lda #$ff
+	sta $d40e
+	sta $d40f
+	lda #$80
+	sta $d412
 }
