@@ -1,4 +1,4 @@
-ASM=java -jar /Applications/KickAssembler/KickAss.jar
+ASM=acme
 VICEDIR=/Applications/VICE/tools
 C128=${VICEDIR}/x128
 TOKENIZER=${VICEDIR}/petcat -w70 -nh -f
