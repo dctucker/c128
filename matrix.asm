@@ -4,25 +4,56 @@
 .const pages = $fc
 .const mvdst = $fd
 .const screen = $0400
+.const VIC_BG_COL = $d021
 
 .pc = $1400 "Assembly main"
 
 start:
-	// jsr set_character_ram
-	lda vshtxt
-	and #$f0
-	ora #$0c
-	sta vshtxt
-	jsr Free_Graphics_RAM
+	jsr set_character_ram
 	:move_basic($4000)
 	:random_init()
+	jsr set_colors
 	jmp matrix_loop
 	//jsr copy_character_rom
 	//jsr edit_character_ram
 	rts
 
+set_character_ram:
+	lda $d018
+	and #$f0
+	ora #$0c
+	sta $d018
+
+	detect_platform(C128)
+	bne !+
+	sta vshtxt
+	jsr Free_Graphics_RAM
+!:
+	rts
+/*
+	:Bank(15)
+	lda $dd00
+	and #$fc
+	ora #$00
+	sta $dd00
+	lda $0a2c
+	and #$f1
+	ora #$08
+	sta $0a2c
+*/
+vshtxts:
+	.word $0a2c, $d018
+
+
+
+set_colors:
+	lda #0
+	sta VIC_BG_COL-1
+	sta VIC_BG_COL
+	rts
+
 copy_character_rom:
-	:Bank(0)
+	Bank(0)
 	lda #$00    // pointer to $D000
 	sta mvsrc   //
 	lda #$d0    //
@@ -64,9 +95,17 @@ inner_loop:
 .const sy = $f6
 
 matrix_loop:
-	:random(40)
+	random(40)
 	sta rx
-	:random(25)
+	random(25)
+/*
+	inc ry
+	lda ry
+	cmp #25
+	bcc !+
+	lda #0
+!:
+*/
 	sta ry
 	:random(46)
 	tay
@@ -132,23 +171,11 @@ edit_character_ram:
 	
 	rts
 
-set_character_ram:
-	:Bank(15)
-	lda $dd00
-	and #$fc
-	ora #$00
-	sta $dd00
-	lda $0a2c
-	and #$f1
-	ora #$08
-	sta $0a2c
-	rts
-
 .pc = $3000 "Character set"
 charset:
 #import "Katakana-charset.s"
 .pc = $3800 "Character set"
 #import "Katakana-charset.s"
 
-
-:BasicUpstart128(start)
+.pc = $1c01
+BasicUpstart(start)
