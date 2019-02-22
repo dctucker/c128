@@ -9,12 +9,7 @@
 .pc = $1400 "Assembly main"
 
 start:
-	// jsr set_character_ram
-	lda vshtxt
-	and #$f0
-	ora #$0c
-	sta vshtxt
-	jsr Free_Graphics_RAM
+	jsr set_character_ram
 	:move_basic($4000)
 	:random_init()
 	jsr set_colors
@@ -22,6 +17,33 @@ start:
 	//jsr copy_character_rom
 	//jsr edit_character_ram
 	rts
+
+set_character_ram:
+	lda $d018
+	and #$f0
+	ora #$0c
+	sta $d018
+
+	detect_platform(C128)
+	bne !+
+	sta vshtxt
+	jsr Free_Graphics_RAM
+!:
+	rts
+/*
+	:Bank(15)
+	lda $dd00
+	and #$fc
+	ora #$00
+	sta $dd00
+	lda $0a2c
+	and #$f1
+	ora #$08
+	sta $0a2c
+*/
+vshtxts:
+	.word $0a2c, $d018
+
 
 
 set_colors:
@@ -147,18 +169,6 @@ edit_character_ram:
 	cpy #8
 	bne !-
 	
-	rts
-
-set_character_ram:
-	:Bank(15)
-	lda $dd00
-	and #$fc
-	ora #$00
-	sta $dd00
-	lda $0a2c
-	and #$f1
-	ora #$08
-	sta $0a2c
 	rts
 
 .pc = $3000 "Character set"

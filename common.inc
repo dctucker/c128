@@ -91,3 +91,13 @@ upstartEnd:
 	lda #>addr
 	sta txttab+1
 }
+
+.const C64 = 72
+.const C128 = 23
+.const CPlus4 = 255
+.const VIC20 = 114
+.const C65 = 135
+.macro detect_platform(platform) {
+	ldy 65534
+	cpy #platform
+}
