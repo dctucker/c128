@@ -4,6 +4,7 @@
 .const pages = $fc
 .const mvdst = $fd
 .const screen = $0400
+.const VIC_BG_COL = $d021
 
 .pc = $1400 "Assembly main"
 
@@ -16,13 +17,21 @@ start:
 	jsr Free_Graphics_RAM
 	:move_basic($4000)
 	:random_init()
+	jsr set_colors
 	jmp matrix_loop
 	//jsr copy_character_rom
 	//jsr edit_character_ram
 	rts
 
+
+set_colors:
+	lda #0
+	sta VIC_BG_COL-1
+	sta VIC_BG_COL
+	rts
+
 copy_character_rom:
-	:Bank(0)
+	Bank(0)
 	lda #$00    // pointer to $D000
 	sta mvsrc   //
 	lda #$d0    //
@@ -64,9 +73,17 @@ inner_loop:
 .const sy = $f6
 
 matrix_loop:
-	:random(40)
+	random(40)
 	sta rx
-	:random(25)
+	random(25)
+/*
+	inc ry
+	lda ry
+	cmp #25
+	bcc !+
+	lda #0
+!:
+*/
 	sta ry
 	:random(46)
 	tay
@@ -150,5 +167,5 @@ charset:
 .pc = $3800 "Character set"
 #import "Katakana-charset.s"
 
-
-:BasicUpstart128(start)
+.pc = $1c01
+BasicUpstart(start)
