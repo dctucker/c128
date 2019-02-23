@@ -5,6 +5,16 @@
 .const txttab = $4000
 .const noise  = $d41b
 
+.const E_40_Line_Lo = $c033
+.const E_40_Line_Hi = $c04c
+.const Scroll_Row = $c40d
+.const Edit_Scroll_Down = $c37c
+.const Edit_Blink_Off = $c8dc
+.const Edit_Steady_Cursor = $cb0b
+.const Edit_Cursor_Off = $cd9f
+
+.const Cursor_To_Window_Home = $c150
+
 .macro BasicUpstart128(address) {
 	.pc = $1c01 "C128 Basic"
 	.word upstartEnd  // link address
@@ -100,4 +110,13 @@ upstartEnd:
 .macro detect_platform(platform) {
 	ldy 65534
 	cpy #platform
+}
+
+.macro fast() {
+	lda #1
+	sta $d030
+}
+.macro slow() {
+	lda #0
+	sta $d030
 }

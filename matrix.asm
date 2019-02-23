@@ -17,7 +17,14 @@ start:
 	random_init()
 	jsr set_colors
 	jsr setup_irq
+
+	jsr Cursor_To_Window_Home
+	jsr Edit_Steady_Cursor
+	jsr Edit_Blink_Off
+	jsr Edit_Cursor_Off
+
 	rts
+
 
 set_character_ram:
 	lda $d018
@@ -186,9 +193,13 @@ scroll_iter:
 	bcs !+
 	rts
 !:
+	fast()
+	//jsr Scroll_Row
+	//jsr Edit_Scroll_Down
+
 	jsr block_scroll
-	//lda #87
-	//jsr JESCAPE
+	slow()
+
 	lda #1
 	sta value
 	rts
@@ -219,14 +230,12 @@ count:
 block_scroll:
 	ldx #0
 !loop:
-	lda #1
-	sta $d030
-.for(var i=24;i>=0;i--) {
-	lda screen+(i+0)*40,x
-	sta screen+(i+1)*40,x
-	//lda color_ram+(i+0)*40,x
-	//sta color_ram+(i+1)*40,x
-}
+	.for(var i=24;i>=0;i--) {
+		lda screen+(i+0)*40,x
+		sta screen+(i+1)*40,x
+		//lda color_ram+(i+0)*40,x
+		//sta color_ram+(i+1)*40,x
+	}
 	inx
 	cpx #40
 	beq !+
@@ -240,9 +249,6 @@ block_scroll:
 	inx
 	cpx #40
 	bne !-
-
-	lda #0
-	sta $d030
 	rts
 
 .align $100
@@ -256,8 +262,8 @@ putchar:
 
 .const plot = $fff0
 	ldx ry
-	lda lines_lsb,x
-	ldy lines_msb,x
+	lda E_40_Line_Lo,x
+	ldy E_40_Line_Hi,x
 	sta offset
 	sty offset+1
 
@@ -326,14 +332,6 @@ kana:
 	.byte 102
 	.for(var i=113; i < 128; i++){
 	.byte i
-	}
-lines_lsb:
-	.for(var i=0; i<25; i++) {
-		.byte <(screen+40*i)
-	}
-lines_msb:
-	.for(var i=0; i<25; i++) {
-		.byte >(screen+40*i)
 	}
 
 
