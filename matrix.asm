@@ -7,13 +7,14 @@
 .const VIC_BG_COL = $d021
 .const color_ram = $d800
 .const vic_scroll_y = $d011
+.const JESCAPE = $c9c1
 
 .pc = $1400 "Assembly main"
 
 start:
 	jsr set_character_ram
-	:move_basic($4000)
-	:random_init()
+	move_basic($4000)
+	random_init()
 	jsr set_colors
 	jsr setup_irq
 	rts
@@ -94,22 +95,16 @@ inner_loop:
 .const offset = $f4
 .const sy = $f6
 
-matrix_loop:
-	jsr matrix_iter
-	jsr setup_irq
-!:
-	jmp !-
-
 matrix_iter:
 	random(40)
 	sta rx
-	random(25)
+	random(20)
 	sta ry
-	:random(46)
+	random(46)
 	tay
 	lda kana,y
 	sta rc
-	:random(4)
+	random(4)
 	sta rk
 	
 	jsr putchar
@@ -119,12 +114,14 @@ matrix_iter:
 
 .word 0
 irq:
+/*
 	sec
 	lda $d019
 	and #$01
 	beq !end+
 	sta $d019
 
+*/
 	jsr matrix_iter
 !end:
 	jmp (irq-2)
@@ -132,7 +129,7 @@ irq:
 setup_irq:
 	sei
 
-	lda #210
+	lda #240
 	sta $d012 // set raster line number
 	lda #1
 	sta $d019
@@ -154,7 +151,6 @@ setup_irq:
 	rts
 
 /* C64 maybe
-setup_irq:
 	lda #%01110111
 	sta $dc0d // switch off CIA-1
 	and $d011
@@ -170,25 +166,35 @@ setup_irq:
 	rts
 */
 
-/* notes from a C128 doc
-irq:
-	pla
-	sta $ff00
-	pla
-	tay
-	pla
-	tax
-	pla
-	rti
-	jmp $fa65
-*/
-
+.align $100
 scroll:
 	inc count
 	lda #%00000001
 	bit count
-	// bne !end+
+	beq scroll_iter
+	rts
 
+scroll_iter:
+	lda vic_scroll_y
+	and #%11111000
+	ora value
+	sta vic_scroll_y
+
+	lda value
+	inc value
+	cmp #8
+	bcs !+
+	rts
+!:
+	jsr block_scroll
+	//lda #87
+	//jsr JESCAPE
+	lda #1
+	sta value
+	rts
+//*/
+
+/*
 	lda vic_scroll_y
 	tax
 	and #%11111000
@@ -202,9 +208,9 @@ scroll:
 	cpx #0
 	bne !+
 	jsr block_scroll
-!:
-!end:
-	rts
+	//lda #87
+	//jsr JESCAPE
+//*/
 value:
 	.byte 0
 count:
@@ -213,6 +219,8 @@ count:
 block_scroll:
 	ldx #0
 !loop:
+	lda #1
+	sta $d030
 .for(var i=24;i>=0;i--) {
 	lda screen+(i+0)*40,x
 	sta screen+(i+1)*40,x
@@ -233,23 +241,66 @@ block_scroll:
 	cpx #40
 	bne !-
 
+	lda #0
+	sta $d030
 	rts
 
+.align $100
 putchar:
+/*
 	lda #<screen
 	sta offset
 	lda #>screen
 	sta offset+1
+*/
 
+.const plot = $fff0
+	ldx ry
+	lda lines_lsb,x
+	ldy lines_msb,x
+	sta offset
+	sty offset+1
+
+	lda rc
+	ldy rx
+	sta (offset),y
+
+	lda #>(color_ram-screen)
+	adc offset+1
+	sta offset+1
+	ldx rk
+	lda colors,x
+	sta (offset),y
+	rts
+	
+/*
+	clc
+	ldx rx
+	ldy ry
+	jsr plot
+	
+	ldx.a $00e0
+	stx offset
+	ldx.a $00e1
+	stx offset+1
+
+	lda rc
+	ldy rx
+	sta (offset),y
+	rts
+*/
+	
+	
+/*
 	lda ry
 	sta sy
 	lda #0
 	sta sy+1 // sy = 0x00ff & ry
 
-	:mul2(3,sy)
-	:bigadd(sy,offset)
-	:mul2(2,sy)
-	:bigadd(sy,offset)
+	mul2(3,sy)
+	bigadd(sy,offset)
+	mul2(2,sy)
+	bigadd(sy,offset)
 	
 	lda rc
 	ldy rx
@@ -262,6 +313,7 @@ putchar:
 	lda colors,x
 	sta (offset),y
 	rts
+*/
 
 colors:
 	// wht, l.grn, grn, d.gry, blk
@@ -274,6 +326,14 @@ kana:
 	.byte 102
 	.for(var i=113; i < 128; i++){
 	.byte i
+	}
+lines_lsb:
+	.for(var i=0; i<25; i++) {
+		.byte <(screen+40*i)
+	}
+lines_msb:
+	.for(var i=0; i<25; i++) {
+		.byte >(screen+40*i)
 	}
 
 
