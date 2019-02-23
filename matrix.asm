@@ -5,6 +5,8 @@
 .const mvdst = $fd
 .const screen = $0400
 .const VIC_BG_COL = $d021
+.const color_ram = $d800
+.const vic_scroll_y = $d011
 
 .pc = $1400 "Assembly main"
 
@@ -13,9 +15,7 @@ start:
 	:move_basic($4000)
 	:random_init()
 	jsr set_colors
-	jmp matrix_loop
-	//jsr copy_character_rom
-	//jsr edit_character_ram
+	jsr setup_irq
 	rts
 
 set_character_ram:
@@ -95,17 +95,15 @@ inner_loop:
 .const sy = $f6
 
 matrix_loop:
+	jsr matrix_iter
+	jsr setup_irq
+!:
+	jmp !-
+
+matrix_iter:
 	random(40)
 	sta rx
 	random(25)
-/*
-	inc ry
-	lda ry
-	cmp #25
-	bcc !+
-	lda #0
-!:
-*/
 	sta ry
 	:random(46)
 	tay
@@ -113,9 +111,129 @@ matrix_loop:
 	sta rc
 	:random(4)
 	sta rk
-
+	
 	jsr putchar
-	jmp matrix_loop
+	jsr scroll
+	rts
+
+
+.word 0
+irq:
+	sec
+	lda $d019
+	and #$01
+	beq !end+
+	sta $d019
+
+	jsr matrix_iter
+!end:
+	jmp (irq-2)
+
+setup_irq:
+	sei
+
+	lda #210
+	sta $d012 // set raster line number
+	lda #1
+	sta $d019
+
+	ldx $0314
+	ldy $0315
+	stx irq-2
+	sty irq-1
+	
+	lda #<irq
+	sta $0314
+	lda #>irq
+	sta $0315
+
+	lda #$ff
+	sta.a $00d8
+
+	cli
+	rts
+
+/* C64 maybe
+setup_irq:
+	lda #%01110111
+	sta $dc0d // switch off CIA-1
+	and $d011
+	sta $d011 // clear MSB in raster register
+	lda #210
+	sta $d012 // set raster line number
+	lda #<irq
+	sta $0314
+	lda #>irq
+	sta $0315 // set irq vector
+	lda #1
+	sta $d01a // enable raster interrupt from VIC
+	rts
+*/
+
+/* notes from a C128 doc
+irq:
+	pla
+	sta $ff00
+	pla
+	tay
+	pla
+	tax
+	pla
+	rti
+	jmp $fa65
+*/
+
+scroll:
+	inc count
+	lda #%00000001
+	bit count
+	// bne !end+
+
+	lda vic_scroll_y
+	tax
+	and #%11111000
+	sta value
+	inx
+	txa
+	and #%00000111
+	tax
+	ora value
+	sta vic_scroll_y
+	cpx #0
+	bne !+
+	jsr block_scroll
+!:
+!end:
+	rts
+value:
+	.byte 0
+count:
+	.byte 0
+
+block_scroll:
+	ldx #0
+!loop:
+.for(var i=24;i>=0;i--) {
+	lda screen+(i+0)*40,x
+	sta screen+(i+1)*40,x
+	//lda color_ram+(i+0)*40,x
+	//sta color_ram+(i+1)*40,x
+}
+	inx
+	cpx #40
+	beq !+
+	jmp !loop-
+
+!:
+	lda #$20
+	ldx #0
+!:
+	sta screen,x
+	inx
+	cpx #40
+	bne !-
+
+	rts
 
 putchar:
 	lda #<screen
@@ -137,7 +255,7 @@ putchar:
 	ldy rx
 	sta (offset),y
 
-	lda #$d4
+	lda #>(color_ram-screen)
 	adc offset+1
 	sta offset+1
 	ldx rk
