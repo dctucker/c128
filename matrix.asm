@@ -105,7 +105,8 @@ inner_loop:
 matrix_iter:
 	random(40)
 	sta rx
-	random(20)
+	random(16)
+	adc #01
 	sta ry
 	random(46)
 	tay
@@ -121,17 +122,17 @@ matrix_iter:
 
 .word 0
 irq:
-/*
 	sec
 	lda $d019
 	and #$01
 	beq !end+
 	sta $d019
 
-*/
 	jsr matrix_iter
 !end:
-	jmp (irq-2)
+	asl $d019
+	jmp $fa6b
+	//jmp (irq-2)
 
 setup_irq:
 	sei
@@ -141,18 +142,24 @@ setup_irq:
 	lda #1
 	sta $d019
 
+/*
 	ldx $0314
 	ldy $0315
 	stx irq-2
 	sty irq-1
+*/
 	
 	lda #<irq
 	sta $0314
 	lda #>irq
 	sta $0315
+	lda #1
+	sta $d01a // enable raster interrupt from VIC
 
+/*
 	lda #$ff
 	sta.a $00d8
+*/
 
 	cli
 	rts
@@ -203,25 +210,7 @@ scroll_iter:
 	lda #1
 	sta value
 	rts
-//*/
 
-/*
-	lda vic_scroll_y
-	tax
-	and #%11111000
-	sta value
-	inx
-	txa
-	and #%00000111
-	tax
-	ora value
-	sta vic_scroll_y
-	cpx #0
-	bne !+
-	jsr block_scroll
-	//lda #87
-	//jsr JESCAPE
-//*/
 value:
 	.byte 0
 count:
@@ -230,11 +219,11 @@ count:
 block_scroll:
 	ldx #0
 !loop:
-	.for(var i=24;i>=0;i--) {
-		lda screen+(i+0)*40,x
-		sta screen+(i+1)*40,x
-		//lda color_ram+(i+0)*40,x
-		//sta color_ram+(i+1)*40,x
+	.for(var i=24;i>=1;i--) {
+		lda screen+(i-1)*40,x
+		sta screen+(i-0)*40,x
+		lda color_ram+(i-1)*40,x
+		sta color_ram+(i-0)*40,x
 	}
 	inx
 	cpx #40
@@ -242,13 +231,6 @@ block_scroll:
 	jmp !loop-
 
 !:
-	lda #$20
-	ldx #0
-!:
-	sta screen,x
-	inx
-	cpx #40
-	bne !-
 	rts
 
 .align $100

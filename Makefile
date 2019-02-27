@@ -6,6 +6,9 @@ matrix.prg: common.inc matrix.asm matrix.bas Katakana-charset.s
 	${TOKENIZER} -o matrix.seq matrix.bas
 	${ASM} matrix.asm
 
+raster.prg: raster.asm
+	${ASM} raster.asm
+
 clean:
 	rm -f *.seq *.prg
 
