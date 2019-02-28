@@ -11,15 +11,14 @@ start:
 	//jsr set_character_ram
 	move_basic($4000)
 	random_init()
+
 	jsr set_colors
+	jsr tetris_init
 	jsr setup_irq
 
-	jsr Cursor_To_Window_Home
-	jsr Edit_Steady_Cursor
-	jsr Edit_Blink_Off
-	jsr Edit_Cursor_Off
-
-	rts
+loop:
+	jsr draw_piece
+	jmp loop
 
 
 set_character_ram:
@@ -43,11 +42,15 @@ set_colors:
 	sta VIC_BG_COL
 	rts
 
+.pc = E_40_Line_Lo
+
 
 .pc = $1500 "Game loop"
 
-.const well_x = $10
-.const well_height = $20
+.const well_x = 10
+.const well_y = 2
+.const well_width = 10
+.const well_height = 20
 .const t = $f0
 .const cx = $f1
 .const cy = $f2
@@ -56,25 +59,74 @@ set_colors:
 .const state = $f7
 .const piece = $f8
 
+tetris_init:
+	lda #<screen
+	sta offset
+	lda #>screen
+	sta offset+1
+	ldy #0
+!:
+	clc
+	lda offset
+	adc #40
+	sta E_40_Line_Lo,y
+	sta offset
+	lda offset+1
+	adc #0
+	sta E_40_Line_Hi,y
+	sta offset+1
+	iny
+	cpy #24
+	bne !-
+
+	ldy well_height + well_y
+!y:
+	dey
+	sty cy
+	ldx cy
+	lda E_40_Line_Lo,x
+	sta offset
+	lda E_40_Line_Hi,x
+	sta offset+1
+	ldx well_width + well_x
+!x:
+	dex
+	lda #$20
+	sta (offset), x
+	cpx #0
+	bne !x-
+	cpy #0
+	bne !y-
+	
+/*
+	lda #$20
+	sta 40*j + screen + i + well_x
+	
+	.for(var j=0; j < well_height; j++){
+		lda #$20
+		.for(var i=0; i < well_width; i++){
+			sta 40*j + screen + i + well_x
+		}
+		lda #116
+		sta 40*j + screen + well_width + well_x
+		sta 40*j + screen - 1 + well_x
+	}
+	lda #114
+	.for(var i=-1; i < well_width; i++){
+		sta 40*well_height + screen + i + well_x
+	}
+	lda #20
+	sta cy
+	ldx #4
+	stx cx
+*/
+	rts
+
 tetris_iter:
-	/*
-	random(40)
-	sta rx
-	random(16)
-	adc #01
-	sta ry
-	random(46)
-	tay
-	lda kana,y
-	sta rc
-	random(4)
-	sta rk
-	*/
-	//jsr putchar
+	jsr draw_piece
 
 	inc t
-	lda t
-	beq fall
+	bvs fall
 fell:
 	rts
 
@@ -141,6 +193,21 @@ setup_irq:
 	cli
 	rts
 
+draw_piece:
+	lda well_y + well_height
+	sbc cy
+	tax
+	lda E_40_Line_Lo,x
+	ldy E_40_Line_Hi,x
+	sta offset
+	sty offset+1
+	lda well_x
+	adc cx
+	tay
+	lda #90
+	sta (offset),y
+	rts
+	
 /*
 .align $100
 putchar:
