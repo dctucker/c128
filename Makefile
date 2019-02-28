@@ -9,6 +9,9 @@ matrix.prg: common.inc matrix.asm matrix.bas Katakana-charset.s
 raster.prg: raster.asm
 	${ASM} raster.asm
 
+tetris.prg: tetris.asm common.inc
+	${ASM} tetris.asm
+
 clean:
 	rm -f *.seq *.prg
 

@@ -13,6 +13,11 @@
 .const Edit_Steady_Cursor = $cb0b
 .const Edit_Cursor_Off = $cd9f
 
+.const VIC_BG_COL = $d021
+.const color_ram = $d800
+.const vic_scroll_y = $d011
+.const JESCAPE = $c9c1
+
 .const Cursor_To_Window_Home = $c150
 
 .macro BasicUpstart128(address) {
@@ -79,12 +84,15 @@ upstartEnd:
 }
 
 .macro random(max) {
-!:
 	clc
 	lda noise
 	and #pow(2,ceil(log(max)/log(2)))-1
+!:
 	cmp #max
-	bcs !-
+	bcc !+
+	lsr
+	jmp !-
+!:
 }
 
 .macro random_init() {
